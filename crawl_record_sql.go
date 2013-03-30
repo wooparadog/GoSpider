@@ -2,7 +2,6 @@ package main
 
 import(
     "log"
-    "sync"
     "database/sql"
     _ "github.com/mattn/go-sqlite3"
 )
@@ -12,9 +11,10 @@ type sqlite_row struct{
 }
 
 type SqliteRecorder struct{
-    conn *sql.DB
-    mutex sync.Mutex
+    conn chan *sql.DB
 }
+
+var ConnectionPool chan *sql.DB
 
 func CreateSqliteRecorder(location string) SqliteRecorder{
     conn, err := sql.Open("sqlite3", location)
@@ -25,20 +25,30 @@ func CreateSqliteRecorder(location string) SqliteRecorder{
     if err != nil{
         log.Fatal("Sqlite Recorder Table download_record does not exists and cannot be created")
     }
+    ConnectionPool = make(chan *sql.DB, 1)
+    ConnectionPool <- conn
     log.Println("Sqlite Recorder Connected : ", location)
-    return SqliteRecorder{conn: conn}
+    return SqliteRecorder{conn: ConnectionPool}
+}
+
+func (self *SqliteRecorder) Execute(sql string, params ...interface{}) (sql.Result, error){
+    conn := <- self.conn
+    defer func(){self.conn <- conn}()
+    return conn.Exec(sql, params...)
+}
+
+func (self *SqliteRecorder) QueryRow(sql string, params ...interface{}) *sql.Row{
+    conn := <- self.conn
+    defer func(){self.conn <- conn}()
+    return conn.QueryRow(sql, params...)
 }
 
 func (self *SqliteRecorder) MarkAsFinished(url string){
-    self.mutex.Lock()
-    self.conn.Exec("insert into download_record values(?)", url)
-    self.mutex.Unlock()
+    self.Execute("insert into download_record values(?)", url)
 }
 
 func (self *SqliteRecorder) HasFinished(url string) bool{
-    self.mutex.Lock()
-    row := self.conn.QueryRow("select url from download_record where url=?", url)
-    self.mutex.Unlock()
+    row := self.QueryRow("select url from download_record where url=?", url)
     sqlite_record := sqlite_row{}
     if err:=row.Scan(&sqlite_record.url); err!=nil{
         return false
