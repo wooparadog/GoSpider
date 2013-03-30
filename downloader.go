@@ -1,7 +1,7 @@
 package main
 
 import(
-    dwler "downloader"
+    dwler "github.com/wooparadog/GoDownload"
 )
 
 type Parser interface {
@@ -26,13 +26,10 @@ var DownloadWorker chan *Downloader
 
 func MakeDownloaderWorkers() {
     var worker_factory func() Downloader
-    switch Config.UseProxy{
-    case true:
+    if Config.UseProxy {
         worker_factory = ProxyDownloaderFactory
-        break
-    case false:
+    }else{
         worker_factory = DirectDownloaderFactory
-        break
     }
     DownloadWorker = make(chan *Downloader, CONCURENT_DOWNLOADS)
     for i:=0;i<CONCURENT_DOWNLOADS;i++{

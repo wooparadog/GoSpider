@@ -2,7 +2,7 @@
     "Proxy":"http://127.0.0.1:8087",
     "CheckInterval": 1,
     "Recorder": "sqlite",
-    "Timeout": 1,
+    "Timeout": 10,
     "UseProxy": true,
     "TumblrSources":[
         {"name": "arthuntermag", "suffix":"_500", "url":"http://www.arthuntermag.com/rss"}

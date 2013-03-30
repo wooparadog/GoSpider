@@ -1,7 +1,7 @@
 package main
 
 import(
-    "redis"
+    redis "github.com/wooparadog/redis"
     "os"
     "fmt"
     "sync"
