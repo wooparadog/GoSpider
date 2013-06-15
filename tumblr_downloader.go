@@ -37,9 +37,9 @@ func (self *TumblrImg) GetUrl() string{
 }
 
 type TumblrDownloader struct{
-    recorder Recorder
     UrlChan chan ImgResource
     ContenChan chan Content
+    recorder Recorder
     img_id_finder *regexp.Regexp
     name string
     rss_img_size string
@@ -49,13 +49,13 @@ type TumblrDownloader struct{
 func MakeTumblrDownloader(name, rss_img_size, rss_addr string, recorder Recorder) TumblrDownloader{
     img_id_finder,_ := regexp.Compile(`tumblr_(.*?)_`)
     downloader := TumblrDownloader{
-        recorder:recorder,
         name:name,
         rss_img_size:rss_img_size,
         rss_addr:rss_addr,
+        img_id_finder: img_id_finder,
+        recorder:recorder,
         ContenChan:make(chan Content),
         UrlChan:make(chan ImgResource),
-        img_id_finder: img_id_finder,
     }
     return downloader
 }
@@ -156,6 +156,14 @@ func (self *TumblrDownloader) check_rss(){
     }
 }
 
+func (self *TumblrDownloader) GetContentChan() chan Content{
+    return self.ContenChan
+}
+
+func (self *TumblrDownloader) GetUrlChan() chan ImgResource{
+    return self.UrlChan
+}
+
 func (self *TumblrDownloader) Start(){
     go self.check_rss()
     go self.AfterFinished()
@@ -164,6 +172,6 @@ func (self *TumblrDownloader) Start(){
         if !ok {
             break
         }
-        go Download_raw(img_resource, *self)
+        go Download_raw(img_resource, self)
     }
 }
