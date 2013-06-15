@@ -1,4 +1,4 @@
-package main
+package go_spider
 
 import(
     redis "github.com/wooparadog/redis"

@@ -1,4 +1,4 @@
-package main
+package go_spider
 
 type Recorder interface {
     MarkAsFinished(url string)
