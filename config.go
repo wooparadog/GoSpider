@@ -42,8 +42,10 @@ func ParseConfig(){
     if err == nil{
         err = json.Unmarshal(raw_config, &Config)
         log.Printf("Proxy:\t\t %s", Config.Proxy)
-        log.Printf("Check Interval:\t %s", Config.CheckInterval)
-        log.Printf("Tumblr Sources:\t %s", Config.TumblrSources)
+        log.Printf("Check Interval:\t %d minutes", Config.CheckInterval)
+        for _, source := range Config.TumblrSources{
+            log.Printf("Source:\t %s", source.Url)
+        }
         return
     }
     if err != nil{

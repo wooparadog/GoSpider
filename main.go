@@ -3,8 +3,6 @@ package main
 import(
 )
 
-var exit_signal chan int
-
 func main(){
     ParseConfig()
     recorder := CreateRecorders()
